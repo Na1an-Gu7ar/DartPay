@@ -62,6 +62,7 @@ class ApiService {
   Future<PaymentModel> sendPayment({
     required String upiId,
     required double amount,
+    required String note
   }) async {
     try {
       await Future.delayed(const Duration(seconds: 1));
@@ -69,7 +70,7 @@ class ApiService {
       final response = await _client.post(
         Uri.parse('$_baseUrl/posts'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'upiId': upiId, 'amount': amount}),
+        body: jsonEncode({'upiId': upiId, 'amount': amount, 'note': note}),
       );
 
       if (response.statusCode != 201) {
@@ -90,6 +91,7 @@ class ApiService {
         amount: amount,
         dateTime: DateTime.now(),
         status: status,
+        note: note
       );
 
       return PaymentModel(

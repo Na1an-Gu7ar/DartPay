@@ -8,7 +8,7 @@ class TransactionService {
   // Creates a new successful transaction from the UPI ID and amount.
   TransactionModel createTransaction({
     required String upiId,
-    required double amount,
+    required double amount
   }) {
     final now = DateTime.now();
 
@@ -18,6 +18,9 @@ class TransactionService {
       upiId: upiId,
       amount: amount,
       dateTime: now,
+      receiverName: "shamless",
+      status: TransactionStatus.success,
+      note: "UPI Money"
     );
   }
 }

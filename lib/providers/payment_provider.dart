@@ -20,6 +20,7 @@ class PaymentProvider extends ChangeNotifier {
   Future<PaymentModel?> sendPayment({
     required String upiId,
     required double amount,
+    required String note,
   }) async {
     _isLoading = true;
     _errorMessage = null;
@@ -27,7 +28,7 @@ class PaymentProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _lastPayment = await _apiService.sendPayment(upiId: upiId, amount: amount);
+      _lastPayment = await _apiService.sendPayment(upiId: upiId, amount: amount, note: note);
       return _lastPayment;
     } on ApiException catch (error) {
       _errorMessage = error.message;

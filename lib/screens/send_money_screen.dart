@@ -22,11 +22,13 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
   final _formKey = GlobalKey<FormState>();
   final _upiController = TextEditingController();
   final _amountController = TextEditingController();
+  final _noteController = TextEditingController();
 
   @override
   void dispose() {
     _upiController.dispose();
     _amountController.dispose();
+    _noteController.dispose();
     super.dispose();
   }
 
@@ -38,6 +40,7 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
     final payment = await paymentProvider.sendPayment(
       upiId: _upiController.text.trim(),
       amount: double.parse(_amountController.text.trim()),
+      note: _noteController.text.trim()
     );
 
     if (!mounted) return;
@@ -94,6 +97,15 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
                         icon: Icons.currency_rupee_rounded,
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         validator: Validators.amount,
+                      ),
+                      const SizedBox(height: 16),
+                      CustomTextField(
+                        controller: _noteController,
+                        label: 'Note',
+                        hint: 'what is this about',
+                        icon: Icons.text_format,
+                        keyboardType: TextInputType.multiline,
+                        // validator: Validators.amount,
                       ),
                       const SizedBox(height: 24),
                       Consumer<PaymentProvider>(
