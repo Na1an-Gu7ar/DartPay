@@ -1,65 +1,67 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import 'models/transaction.dart';
-import 'screens/dashboard_screen.dart';
-import 'screens/login_screen.dart';
-import 'screens/splash_screen.dart';
+import 'providers/auth_provider.dart';
+import 'providers/payment_provider.dart';
+import 'providers/theme_provider.dart';
+import 'providers/transaction_provider.dart';
+import 'routes/app_routes.dart';
+import 'services/api_service.dart';
+import 'services/auth_service.dart';
+import 'services/theme_service.dart';
+import 'utils/app_constants.dart';
 
-void main() {
-  runApp(const DartPayApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // SharedPreferences loads before the app starts so providers can read saved data.
+  final preferences = await SharedPreferences.getInstance();
+  final apiService = ApiService();
+
+  runApp(
+    MultiProvider(
+      // MultiProvider keeps provider setup readable as the app grows.
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => AuthProvider(AuthService(preferences))..checkLoginStatus(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ThemeProvider(ThemeService(preferences)),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => TransactionProvider(apiService)..fetchTransactions(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => PaymentProvider(apiService),
+        ),
+      ],
+      child: const DartPayApp(),
+    ),
+  );
 }
 
-// DartPayApp is the root widget of the app.
-// It stores only app-wide state: theme mode and transaction history.
-class DartPayApp extends StatefulWidget {
+class DartPayApp extends StatelessWidget {
   const DartPayApp({super.key});
 
   @override
-  State<DartPayApp> createState() => _DartPayAppState();
-}
-
-class _DartPayAppState extends State<DartPayApp> {
-  // setState is used here because this project is intentionally beginner-friendly.
-  bool _isDarkMode = false;
-  final List<TransactionModel> _transactions = [];
-
-  // This method is passed to screens that need to toggle the theme.
-  void _toggleTheme() {
-    setState(() {
-      _isDarkMode = !_isDarkMode;
-    });
-  }
-
-  // This method is passed to the send money screen through the dashboard.
-  void _addTransaction(TransactionModel transaction) {
-    setState(() {
-      _transactions.insert(0, transaction);
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'DartPay',
-      debugShowCheckedModeBanner: false,
-      themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      theme: _buildTheme(Brightness.light),
-      darkTheme: _buildTheme(Brightness.dark),
-      initialRoute: SplashScreen.routeName,
-      routes: {
-        SplashScreen.routeName: (context) => const SplashScreen(),
-        LoginScreen.routeName: (context) => const LoginScreen(),
-        DashboardScreen.routeName: (context) => DashboardScreen(
-              isDarkMode: _isDarkMode,
-              transactions: _transactions,
-              onThemeToggle: _toggleTheme,
-              onTransactionCreated: _addTransaction,
-            ),
+    // Consumer rebuilds MaterialApp when auth or theme state changes.
+    return Consumer2<AuthProvider, ThemeProvider>(
+      builder: (context, authProvider, themeProvider, child) {
+        return MaterialApp.router(
+          title: AppConstants.appName,
+          debugShowCheckedModeBanner: false,
+          themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+          theme: _buildTheme(Brightness.light),
+          darkTheme: _buildTheme(Brightness.dark),
+          routerConfig: AppRouter.createRouter(authProvider),
+        );
       },
     );
   }
 
-  // A shared Material 3 theme keeps the UI modern with very little code.
+  // Material 3 theme with rounded cards and fintech-style blue seed color.
   ThemeData _buildTheme(Brightness brightness) {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: const Color(0xFF2563EB),

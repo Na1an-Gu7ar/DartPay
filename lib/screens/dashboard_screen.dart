@@ -1,27 +1,13 @@
 import 'package:flutter/material.dart';
 
-import '../models/transaction.dart';
 import 'history_screen.dart';
 import 'home_screen.dart';
+import 'profile_screen.dart';
 import 'send_money_screen.dart';
 
-// DashboardScreen owns the bottom navigation bar.
-// It switches between Home, Send Money, and History using setState.
+// Dashboard owns bottom navigation and keeps selected tab in local setState.
 class DashboardScreen extends StatefulWidget {
-  static const routeName = '/dashboard';
-
-  final bool isDarkMode;
-  final List<TransactionModel> transactions;
-  final VoidCallback onThemeToggle;
-  final ValueChanged<TransactionModel> onTransactionCreated;
-
-  const DashboardScreen({
-    super.key,
-    required this.isDarkMode,
-    required this.transactions,
-    required this.onThemeToggle,
-    required this.onTransactionCreated,
-  });
+  const DashboardScreen({super.key});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -39,32 +25,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final pages = [
-      HomeScreen(
-        transactions: widget.transactions,
-        onSendMoneyTap: () => _changeTab(1),
-        onHistoryTap: () => _changeTab(2),
-      ),
-      SendMoneyScreen(onTransactionCreated: widget.onTransactionCreated),
-      HistoryScreen(transactions: widget.transactions),
+      HomeScreen(onNavigateToTab: _changeTab),
+      const SendMoneyScreen(),
+      const HistoryScreen(),
+      const ProfileScreen(),
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('DartPay'),
-        actions: [
-          IconButton(
-            tooltip: 'Toggle theme',
-            onPressed: widget.onThemeToggle,
-            icon: Icon(
-              widget.isDarkMode
-                  ? Icons.light_mode_rounded
-                  : Icons.dark_mode_rounded,
-            ),
-          ),
-        ],
-      ),
       body: IndexedStack(
-        // IndexedStack keeps each tab alive while the user switches tabs.
+        // IndexedStack preserves screen state while switching tabs.
         index: _selectedIndex,
         children: pages,
       ),
@@ -86,6 +55,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             icon: Icon(Icons.receipt_long_outlined),
             selectedIcon: Icon(Icons.receipt_long_rounded),
             label: 'History',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline_rounded),
+            selectedIcon: Icon(Icons.person_rounded),
+            label: 'Profile',
           ),
         ],
       ),

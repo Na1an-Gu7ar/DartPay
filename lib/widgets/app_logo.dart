@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-// Reusable app logo used on the splash and login screens.
+// Reusable app logo used on auth and splash screens.
 class AppLogo extends StatelessWidget {
   final double size;
 
@@ -10,18 +10,22 @@ class AppLogo extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
       height: size,
       width: size,
       decoration: BoxDecoration(
-        // Material 3 colors automatically adapt to light and dark themes.
-        color: colorScheme.primaryContainer,
+        gradient: LinearGradient(
+          colors: [colorScheme.primary, colorScheme.tertiary],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(size * 0.28),
       ),
       child: Icon(
-        Icons.bolt_rounded,
-        color: colorScheme.onPrimaryContainer,
-        size: size * 0.56,
+        Icons.account_balance_wallet_rounded,
+        color: colorScheme.onPrimary,
+        size: size * 0.52,
       ),
     );
   }

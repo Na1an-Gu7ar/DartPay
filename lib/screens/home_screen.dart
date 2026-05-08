@@ -1,131 +1,116 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
-import '../models/transaction.dart';
-import '../widgets/transaction_card.dart';
+import '../providers/auth_provider.dart';
+import '../providers/transaction_provider.dart';
+import '../routes/app_routes.dart';
+import '../utils/app_constants.dart';
+import '../widgets/balance_card.dart';
+import '../widgets/empty_state_widget.dart';
+import '../widgets/loading_widget.dart';
+import '../widgets/transaction_tile.dart';
 
-// Home screen shows the balance card, quick actions, and recent transactions.
+// Home screen demonstrates Consumer, pull-to-refresh, and recent transactions.
 class HomeScreen extends StatelessWidget {
-  final List<TransactionModel> transactions;
-  final VoidCallback onSendMoneyTap;
-  final VoidCallback onHistoryTap;
+  final ValueChanged<int> onNavigateToTab;
 
-  const HomeScreen({
-    super.key,
-    required this.transactions,
-    required this.onSendMoneyTap,
-    required this.onHistoryTap,
-  });
+  const HomeScreen({super.key, required this.onNavigateToTab});
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final recentTransactions = transactions.take(3).toList();
+    final user = context.watch<AuthProvider>().user;
 
-    return ListView(
-      padding: const EdgeInsets.all(20),
-      children: [
-        Card(
-          color: colorScheme.primaryContainer,
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Available balance',
-                  style: TextStyle(color: colorScheme.onPrimaryContainer),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  '₹24,580.50',
-                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                        color: colorScheme.onPrimaryContainer,
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    FilledButton.icon(
-                      onPressed: onSendMoneyTap,
-                      icon: const Icon(Icons.send_rounded),
-                      label: const Text('Send money'),
-                    ),
-                    const SizedBox(width: 12),
-                    OutlinedButton.icon(
-                      onPressed: onHistoryTap,
-                      icon: const Icon(Icons.history_rounded),
-                      label: const Text('History'),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(AppConstants.appName),
+        actions: [
+          IconButton(
+            tooltip: 'Profile',
+            onPressed: () => onNavigateToTab(3),
+            icon: const Icon(Icons.person_rounded),
           ),
-        ),
-        const SizedBox(height: 24),
-        Text(
-          'Quick actions',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            _QuickActionCard(
-              icon: Icons.qr_code_scanner_rounded,
-              label: 'Scan',
-              onTap: onSendMoneyTap,
-            ),
-            const SizedBox(width: 12),
-            _QuickActionCard(
-              icon: Icons.person_add_alt_1_rounded,
-              label: 'UPI ID',
-              onTap: onSendMoneyTap,
-            ),
-            const SizedBox(width: 12),
-            _QuickActionCard(
-              icon: Icons.account_balance_wallet_rounded,
-              label: 'Wallet',
-              onTap: () {},
-            ),
-          ],
-        ),
-        const SizedBox(height: 24),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        ],
+      ),
+      body: RefreshIndicator(
+        onRefresh: () => context.read<TransactionProvider>().fetchTransactions(),
+        child: ListView(
+          padding: const EdgeInsets.all(20),
           children: [
             Text(
-              'Recent activity',
-              style: Theme.of(context).textTheme.titleLarge,
+              'Hello, ${user?.name ?? 'Learner'} 👋',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
-            TextButton(
-              onPressed: onHistoryTap,
-              child: const Text('View all'),
+            const SizedBox(height: 8),
+            const Text('Welcome back to your UPI dashboard.'),
+            const SizedBox(height: 20),
+            BalanceCard(
+              balance: AppConstants.demoBalance,
+              onSendMoneyTap: () => onNavigateToTab(1),
+              onQrTap: () => context.push(AppRoutes.qrScanner),
+            ),
+            const SizedBox(height: 24),
+            Text('Quick actions', style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                _QuickAction(icon: Icons.send_rounded, label: 'Send', onTap: () => onNavigateToTab(1)),
+                const SizedBox(width: 12),
+                _QuickAction(icon: Icons.history_rounded, label: 'History', onTap: () => onNavigateToTab(2)),
+                const SizedBox(width: 12),
+                _QuickAction(icon: Icons.qr_code_rounded, label: 'QR', onTap: () => context.push(AppRoutes.qrScanner)),
+              ],
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Recent transactions', style: Theme.of(context).textTheme.titleLarge),
+                TextButton(onPressed: () => onNavigateToTab(2), child: const Text('View all')),
+              ],
+            ),
+            Consumer<TransactionProvider>(
+              builder: (context, provider, child) {
+                if (provider.isLoading && provider.transactions.isEmpty) {
+                  return const SizedBox(height: 220, child: LoadingWidget(message: 'Loading recent activity...'));
+                }
+                if (provider.errorMessage != null && provider.transactions.isEmpty) {
+                  return EmptyStateWidget(
+                    icon: Icons.wifi_off_rounded,
+                    title: 'Could not load data',
+                    message: provider.errorMessage!,
+                    actionLabel: 'Retry',
+                    onActionPressed: provider.fetchTransactions,
+                  );
+                }
+                final recent = provider.transactions.take(3).toList();
+                if (recent.isEmpty) {
+                  return const EmptyStateWidget(
+                    icon: Icons.receipt_long_rounded,
+                    title: 'No payments yet',
+                    message: 'Send money to see recent activity here.',
+                  );
+                }
+                return Column(
+                  children: recent.map((item) => TransactionTile(transaction: item)).toList(),
+                );
+              },
             ),
           ],
         ),
-        if (recentTransactions.isEmpty)
-          const _EmptyRecentTransactions()
-        else
-          ...recentTransactions.map(
-            (transaction) => TransactionCard(transaction: transaction),
-          ),
-      ],
+      ),
     );
   }
 }
 
-// Private reusable widget for the small action cards on the home screen.
-class _QuickActionCard extends StatelessWidget {
+class _QuickAction extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
 
-  const _QuickActionCard({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
+  const _QuickAction({required this.icon, required this.label, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -144,30 +129,6 @@ class _QuickActionCard extends StatelessWidget {
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _EmptyRecentTransactions extends StatelessWidget {
-  const _EmptyRecentTransactions();
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            Icon(
-              Icons.receipt_long_rounded,
-              size: 42,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(height: 12),
-            const Text('No transactions yet. Send your first payment!'),
-          ],
         ),
       ),
     );

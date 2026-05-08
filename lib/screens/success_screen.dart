@@ -1,17 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
+import '../models/payment_model.dart';
 import '../models/transaction.dart';
-import '../widgets/primary_button.dart';
+import '../routes/app_routes.dart';
+import '../widgets/custom_button.dart';
 
-// This screen confirms that the sample payment was successful.
+// Success screen receives PaymentModel through GoRouter's extra parameter.
 class SuccessScreen extends StatelessWidget {
-  final TransactionModel transaction;
+  final PaymentModel? payment;
 
-  const SuccessScreen({super.key, required this.transaction});
+  const SuccessScreen({super.key, required this.payment});
 
   @override
   Widget build(BuildContext context) {
+    final transaction = payment?.transaction;
+    final status = transaction?.status ?? TransactionStatus.failed;
+    final isSuccess = status == TransactionStatus.success;
+    final isPending = status == TransactionStatus.pending;
     final colorScheme = Theme.of(context).colorScheme;
+    final statusColor = isSuccess
+        ? Colors.green
+        : isPending
+            ? Colors.orange
+            : colorScheme.error;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Payment status')),
@@ -21,48 +33,51 @@ class SuccessScreen extends StatelessWidget {
           children: [
             const Spacer(),
             CircleAvatar(
-              radius: 52,
-              backgroundColor: colorScheme.primaryContainer,
+              radius: 54,
+              backgroundColor: statusColor.withOpacity(0.12),
               child: Icon(
-                Icons.check_rounded,
+                isSuccess
+                    ? Icons.check_rounded
+                    : isPending
+                        ? Icons.schedule_rounded
+                        : Icons.close_rounded,
+                color: statusColor,
                 size: 64,
-                color: colorScheme.onPrimaryContainer,
               ),
             ),
             const SizedBox(height: 24),
             Text(
-              'Payment successful!',
+              payment?.message ?? 'Payment details are unavailable',
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 8),
-            Text(
-              '${transaction.formattedAmount} sent to ${transaction.upiId}',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
+            const SizedBox(height: 10),
+            if (transaction != null)
+              Text(
+                '${transaction.formattedAmount} to ${transaction.upiId}',
+                textAlign: TextAlign.center,
+              ),
             const SizedBox(height: 24),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    _DetailRow(label: 'Transaction ID', value: transaction.id),
-                    const Divider(height: 28),
-                    _DetailRow(label: 'Status', value: transaction.status),
-                    const Divider(height: 28),
-                    _DetailRow(label: 'UPI ID', value: transaction.upiId),
-                  ],
+            if (transaction != null)
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      _DetailRow(label: 'Transaction ID', value: transaction.id),
+                      const Divider(height: 28),
+                      _DetailRow(label: 'Status', value: transaction.statusLabel),
+                      const Divider(height: 28),
+                      _DetailRow(label: 'Receiver', value: transaction.receiverName),
+                    ],
+                  ),
                 ),
               ),
-            ),
             const Spacer(),
-            PrimaryButton(
-              label: 'Back to DartPay',
+            CustomButton(
+              label: 'Back to dashboard',
               icon: Icons.home_rounded,
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => context.go(AppRoutes.dashboard),
             ),
           ],
         ),
