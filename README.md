@@ -1,6 +1,6 @@
-# SwiftPay
+# DartPay
 
-SwiftPay is a beginner-friendly Flutter UPI payment demo app. It uses a simple folder structure, Material 3, reusable widgets, and `setState` for state management.
+DartPay is a beginner-friendly Flutter UPI payment demo app. It uses a simple folder structure, Material 3, reusable widgets, and `setState` for state management.
 
 ## What you can learn
 

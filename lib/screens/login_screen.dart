@@ -42,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const AppLogo(),
               const SizedBox(height: 28),
               Text(
-                'Welcome to\nSwiftPay',
+                'Welcome to\nDartPay',
                 style: Theme.of(context).textTheme.displaySmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),

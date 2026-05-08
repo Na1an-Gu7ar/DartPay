@@ -37,7 +37,7 @@ class _SplashScreenState extends State<SplashScreen> {
             const AppLogo(size: 104),
             const SizedBox(height: 24),
             Text(
-              'SwiftPay',
+              'DartPay',
               style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),

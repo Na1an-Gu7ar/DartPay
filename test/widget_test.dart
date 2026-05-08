@@ -1,11 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:swiftpay/main.dart';
+import 'package:DartPay/main.dart';
 
 void main() {
-  testWidgets('SwiftPay starts with splash screen', (tester) async {
-    await tester.pumpWidget(const SwiftPayApp());
+  testWidgets('DartPay starts with splash screen', (tester) async {
+    await tester.pumpWidget(const DartPayApp());
 
-    expect(find.text('SwiftPay'), findsOneWidget);
+    expect(find.text('DartPay'), findsOneWidget);
     expect(find.text('Fast UPI payments for everyone'), findsOneWidget);
   });
 }

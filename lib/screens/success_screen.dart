@@ -60,7 +60,7 @@ class SuccessScreen extends StatelessWidget {
             ),
             const Spacer(),
             PrimaryButton(
-              label: 'Back to SwiftPay',
+              label: 'Back to DartPay',
               icon: Icons.home_rounded,
               onPressed: () => Navigator.pop(context),
             ),

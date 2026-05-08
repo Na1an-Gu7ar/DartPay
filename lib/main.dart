@@ -6,19 +6,19 @@ import 'screens/login_screen.dart';
 import 'screens/splash_screen.dart';
 
 void main() {
-  runApp(const SwiftPayApp());
+  runApp(const DartPayApp());
 }
 
-// SwiftPayApp is the root widget of the app.
+// DartPayApp is the root widget of the app.
 // It stores only app-wide state: theme mode and transaction history.
-class SwiftPayApp extends StatefulWidget {
-  const SwiftPayApp({super.key});
+class DartPayApp extends StatefulWidget {
+  const DartPayApp({super.key});
 
   @override
-  State<SwiftPayApp> createState() => _SwiftPayAppState();
+  State<DartPayApp> createState() => _DartPayAppState();
 }
 
-class _SwiftPayAppState extends State<SwiftPayApp> {
+class _DartPayAppState extends State<DartPayApp> {
   // setState is used here because this project is intentionally beginner-friendly.
   bool _isDarkMode = false;
   final List<TransactionModel> _transactions = [];
@@ -40,7 +40,7 @@ class _SwiftPayAppState extends State<SwiftPayApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'SwiftPay',
+      title: 'DartPay',
       debugShowCheckedModeBanner: false,
       themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,
       theme: _buildTheme(Brightness.light),

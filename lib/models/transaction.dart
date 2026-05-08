@@ -1,4 +1,4 @@
-// This model represents one money transfer in SwiftPay.
+// This model represents one money transfer in DartPay.
 // Keeping models small makes beginner Flutter projects easier to understand.
 class TransactionModel {
   // A simple unique text id for display and list keys.

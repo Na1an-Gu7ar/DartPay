@@ -56,7 +56,7 @@ class _EmptyHistory extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             const Text(
-              'Your successful SwiftPay transfers will appear here.',
+              'Your successful DartPay transfers will appear here.',
               textAlign: TextAlign.center,
             ),
           ],

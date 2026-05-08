@@ -1,4 +1,4 @@
-name: swiftpay
+name: DartPay
 description: A beginner-friendly Flutter UPI payment learning app.
 publish_to: 'none'
 version: 1.0.0+1

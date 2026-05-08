@@ -50,7 +50,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('SwiftPay'),
+        title: const Text('DartPay'),
         actions: [
           IconButton(
             tooltip: 'Toggle theme',
