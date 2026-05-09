@@ -1,21 +1,20 @@
-# DartPay
+# SwiftPay
 
-DartPay is an intermediate-level Flutter UPI payment learning app. It upgrades the original beginner app with Provider, GoRouter, SharedPreferences, fake API calls, loading states, error states, search, filters, and reusable widgets while keeping the code easy to follow.
+SwiftPay is a real-payment capable Flutter UPI fintech learning app. It keeps the same beginner/intermediate-friendly structure, but now demonstrates real payment concepts: UPI Intent, Razorpay Checkout, QR scanning, SDK callbacks, transaction persistence, connectivity checks, and receipt UI.
 
-> This is a learning/demo app only. It does not process real UPI payments or authenticate real users.
+> Important: this project is for learning. Use Razorpay **test mode** while learning. Production apps must create orders and verify payment signatures on a backend before delivering goods/services.
 
-## What this project teaches
+## What this upgrade teaches
 
-1. Better but still simple folder structure
-2. Provider state management with `ChangeNotifier` and `notifyListeners()`
-3. API integration with the `http` package
-4. Proper model classes with `fromJson()` and `toJson()`
-5. Local storage with `SharedPreferences`
-6. Async/await, loading states, and try/catch error handling
-7. Reusable UI widgets
-8. Named navigation and protected routes with GoRouter
-9. Search and filter UI
-10. Basic animation and snackbar feedback
+1. Real UPI Intent payments with `upi_pay`
+2. Razorpay Checkout integration with callback handling
+3. UPI QR scanning with `mobile_scanner`
+4. Payment states: success, failed, submitted, cancelled
+5. Local transaction persistence with `SharedPreferences`
+6. Connectivity checks with `connectivity_plus`
+7. Receipt UI with copy/share and retry failed payment
+8. Android/iOS permissions for camera, internet, UPI app discovery, and SDK usage
+9. Provider async state management for payment loading and errors
 
 ## Folder structure
 
@@ -23,10 +22,13 @@ DartPay is an intermediate-level Flutter UPI payment learning app. It upgrades t
 lib/
   models/
     payment_model.dart
+    payment_request.dart
     transaction.dart
+    upi_app_model.dart
     user_model.dart
   providers/
     auth_provider.dart
+    connectivity_provider.dart
     payment_provider.dart
     theme_provider.dart
     transaction_provider.dart
@@ -43,13 +45,19 @@ lib/
     send_money_screen.dart
     splash_screen.dart
     success_screen.dart
+    transaction_detail_screen.dart
   services/
     api_service.dart
     auth_service.dart
+    connectivity_service.dart
+    razorpay_service.dart
     theme_service.dart
+    transaction_storage_service.dart
+    upi_payment_service.dart
   utils/
     app_constants.dart
     snackbar_helper.dart
+    upi_qr_parser.dart
     validators.dart
   widgets/
     app_logo.dart
@@ -58,48 +66,93 @@ lib/
     custom_text_field.dart
     empty_state_widget.dart
     loading_widget.dart
-    primary_button.dart
-    transaction_card.dart
+    offline_banner.dart
     transaction_tile.dart
   main.dart
 ```
 
-## Step-by-step learning path
+## Step-by-step learning guide
 
-### 1. App startup and Provider setup
+### 1. App startup
 
-Open `lib/main.dart`. The app loads `SharedPreferences`, creates services, and registers providers with `MultiProvider` before showing the UI.
+Open `lib/main.dart`. SwiftPay loads `SharedPreferences`, creates payment/API services, and registers providers with `MultiProvider`.
 
-### 2. Protected navigation
+### 2. UPI Intent payment flow
 
-Open `lib/routes/app_routes.dart`. GoRouter checks `AuthProvider` and redirects logged-out users to login while allowing logged-in users into the dashboard.
+Open `lib/services/upi_payment_service.dart` and `lib/screens/send_money_screen.dart`.
 
-### 3. Authentication flow
+Flow:
 
-Open `lib/providers/auth_provider.dart`, `lib/services/auth_service.dart`, `lib/screens/login_screen.dart`, and `lib/screens/register_screen.dart`.
+1. Detect installed UPI apps using `upi_pay`.
+2. User selects an app such as Google Pay, PhonePe, Paytm, or BHIM.
+3. SwiftPay launches the selected UPI app with receiver UPI ID, name, amount, and note.
+4. The UPI app asks the user to confirm and enter UPI PIN.
+5. The plugin returns a response.
+6. SwiftPay parses the response and saves a receipt locally.
 
-- Login and register validate forms.
-- AuthProvider simulates async work.
-- AuthService saves the user and token locally.
-- GoRouter reacts to auth changes.
+UPI Intent is useful because your Flutter app does **not** collect UPI PIN. The installed UPI app handles secure authorization.
 
-### 4. API and transaction flow
+### 3. Razorpay flow
 
-Open `lib/services/api_service.dart` and `lib/providers/transaction_provider.dart`.
+Open `lib/services/razorpay_service.dart`.
 
-- `fetchTransactions()` demonstrates a GET request.
-- `sendPayment()` demonstrates a POST request.
-- Providers store loading, error, and data state.
-- UI screens use `Consumer` to rebuild only the needed sections.
+Flow:
 
-### 5. Local storage flow
+1. SwiftPay opens Razorpay Checkout with test key and amount.
+2. Razorpay shows UPI/cards/wallets/netbanking options.
+3. Razorpay triggers one callback:
+   - payment success
+   - payment failure
+   - external wallet
+4. SwiftPay converts the callback into a `PaymentModel`.
+5. SwiftPay saves the transaction and shows the status screen.
 
-Open `lib/services/theme_service.dart` and `lib/providers/theme_provider.dart`.
+Production note: create Razorpay orders on your backend and verify `paymentId`, `orderId`, and `signature` server-side.
 
-- Theme mode is saved with SharedPreferences.
-- The profile switch toggles the theme and persists the choice.
+### 4. QR scanning flow
+
+Open `lib/screens/qr_scanner_screen.dart` and `lib/utils/upi_qr_parser.dart`.
+
+Flow:
+
+1. `mobile_scanner` opens the camera.
+2. User scans a UPI QR code.
+3. SwiftPay reads payloads like `upi://pay?pa=name@bank&pn=Receiver&am=100&tn=Note`.
+4. The parser extracts UPI ID, receiver name, amount, and note.
+5. GoRouter passes that data to the send-money screen for auto-fill.
+
+### 5. Transaction persistence
+
+Open `lib/services/transaction_storage_service.dart` and `lib/providers/transaction_provider.dart`.
+
+Every payment result is stored locally using `SharedPreferences`, so the history survives app restarts. History supports search, status filters, receipt screen, and retry for failed/cancelled payments.
+
+### 6. Connectivity handling
+
+Open `lib/providers/connectivity_provider.dart` and `lib/widgets/offline_banner.dart`.
+
+SwiftPay shows an offline banner and prevents opening Razorpay while offline. UPI Intent can still open installed apps, but the final payment depends on that UPI app and bank/network availability.
+
+## Android setup
+
+`android/app/src/main/AndroidManifest.xml` includes:
+
+- `INTERNET`
+- `ACCESS_NETWORK_STATE`
+- `CAMERA`
+- UPI intent package visibility through `<queries>`
+- A sample `swiftpay://payment` deep link placeholder
+
+## iOS setup
+
+`ios/Runner/Info.plist` includes:
+
+- `NSCameraUsageDescription` for QR scanning
+- `LSApplicationQueriesSchemes` for UPI app discovery/opening
 
 ## Run on your device
+
+Real UPI and camera features must be tested on a physical device.
 
 ```bash
 flutter pub get
@@ -120,4 +173,10 @@ The login screen is pre-filled with demo values:
 - Mobile: `9876543210`
 - PIN: `1234`
 
-You can also create a new demo user from the register screen.
+## Security notes for real fintech apps
+
+- Never store payment secrets in Flutter.
+- Razorpay key secret must stay on your backend.
+- Always verify payment signatures on the backend.
+- Treat frontend callbacks as user-interface signals, not final proof of payment.
+- UPI Intent responses can be unreliable across apps and platforms; verify with backend/payment provider where possible.

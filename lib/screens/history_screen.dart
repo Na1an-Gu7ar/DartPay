@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../models/transaction.dart';
 import '../providers/transaction_provider.dart';
+import '../routes/app_routes.dart';
 import '../widgets/empty_state_widget.dart';
 import '../widgets/loading_widget.dart';
 import '../widgets/transaction_tile.dart';
@@ -77,7 +79,10 @@ class HistoryScreen extends StatelessWidget {
                   )
                 else
                   ...provider.filteredTransactions.map(
-                    (transaction) => TransactionTile(transaction: transaction),
+                    (transaction) => TransactionTile(
+                      transaction: transaction,
+                      onTap: () => context.push(AppRoutes.transactionDetail, extra: transaction),
+                    ),
                   ),
               ],
             ),

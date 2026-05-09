@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../models/transaction.dart';
 
-// TransactionTile is used on both home and history screens.
+// TransactionTile is used on home, history, and receipt screens.
 class TransactionTile extends StatelessWidget {
   final TransactionModel transaction;
+  final VoidCallback? onTap;
 
-  const TransactionTile({super.key, required this.transaction});
+  const TransactionTile({super.key, required this.transaction, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -14,18 +15,20 @@ class TransactionTile extends StatelessWidget {
     final statusColor = switch (transaction.status) {
       TransactionStatus.success => Colors.green,
       TransactionStatus.failed => colorScheme.error,
-      TransactionStatus.pending => Colors.orange,
+      TransactionStatus.submitted => Colors.orange,
+      TransactionStatus.cancelled => Colors.grey,
     };
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
+        onTap: onTap,
         leading: CircleAvatar(
           backgroundColor: statusColor.withOpacity(0.12),
           child: Icon(_statusIcon(transaction.status), color: statusColor),
         ),
         title: Text(transaction.receiverName),
-        subtitle: Text('${transaction.upiId}\n${_formatDate(transaction.dateTime)}'),
+        subtitle: Text('${transaction.upiId}\n${transaction.typeLabel} • ${_formatDate(transaction.dateTime)}'),
         isThreeLine: true,
         trailing: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -43,7 +46,8 @@ class TransactionTile extends StatelessWidget {
     return switch (status) {
       TransactionStatus.success => Icons.check_circle_rounded,
       TransactionStatus.failed => Icons.cancel_rounded,
-      TransactionStatus.pending => Icons.schedule_rounded,
+      TransactionStatus.submitted => Icons.schedule_rounded,
+      TransactionStatus.cancelled => Icons.block_rounded,
     };
   }
 

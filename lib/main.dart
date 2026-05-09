@@ -3,25 +3,29 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'providers/auth_provider.dart';
+import 'providers/connectivity_provider.dart';
 import 'providers/payment_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/transaction_provider.dart';
 import 'routes/app_routes.dart';
 import 'services/api_service.dart';
 import 'services/auth_service.dart';
+import 'services/connectivity_service.dart';
+import 'services/razorpay_service.dart';
 import 'services/theme_service.dart';
+import 'services/transaction_storage_service.dart';
+import 'services/upi_payment_service.dart';
 import 'utils/app_constants.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // SharedPreferences loads before the app starts so providers can read saved data.
+  // SharedPreferences loads before the app starts so providers can restore saved data.
   final preferences = await SharedPreferences.getInstance();
   final apiService = ApiService();
 
   runApp(
     MultiProvider(
-      // MultiProvider keeps provider setup readable as the app grows.
       providers: [
         ChangeNotifierProvider(
           create: (_) => AuthProvider(AuthService(preferences))..checkLoginStatus(),
@@ -30,19 +34,26 @@ Future<void> main() async {
           create: (_) => ThemeProvider(ThemeService(preferences)),
         ),
         ChangeNotifierProvider(
-          create: (_) => TransactionProvider(apiService)..fetchTransactions(),
+          create: (_) => TransactionProvider(
+            apiService,
+            TransactionStorageService(preferences),
+          )..fetchTransactions(),
         ),
         ChangeNotifierProvider(
-          create: (_) => PaymentProvider(apiService),
+          create: (_) => PaymentProvider(UpiPaymentService(), RazorpayService())
+            ..loadInstalledUpiApps(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ConnectivityProvider(ConnectivityService()),
         ),
       ],
-      child: const DartPayApp(),
+      child: const SwiftPayApp(),
     ),
   );
 }
 
-class DartPayApp extends StatelessWidget {
-  const DartPayApp({super.key});
+class SwiftPayApp extends StatelessWidget {
+  const SwiftPayApp({super.key});
 
   @override
   Widget build(BuildContext context) {

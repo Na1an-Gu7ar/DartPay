@@ -48,6 +48,7 @@ class ApiService {
           amount: 125.0 + (index * 87.50),
           dateTime: DateTime.now().subtract(Duration(days: index)),
           status: status,
+          type: TransactionType.upiIntent,
           note: item['title'] as String? ?? 'UPI payment',
         );
       });
@@ -62,7 +63,6 @@ class ApiService {
   Future<PaymentModel> sendPayment({
     required String upiId,
     required double amount,
-    required String note
   }) async {
     try {
       await Future.delayed(const Duration(seconds: 1));
@@ -70,19 +70,19 @@ class ApiService {
       final response = await _client.post(
         Uri.parse('$_baseUrl/posts'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'upiId': upiId, 'amount': amount, 'note': note}),
+        body: jsonEncode({'upiId': upiId, 'amount': amount}),
       );
 
       if (response.statusCode != 201) {
         throw const ApiException('Payment server rejected the request');
       }
 
-      // Random status helps learners see success, pending, and failure states.
+      // Random status helps learners see success, submitted, and failure states.
       final random = Random();
       final status = random.nextInt(10) < 7
           ? TransactionStatus.success
           : random.nextBool()
-              ? TransactionStatus.pending
+              ? TransactionStatus.submitted
               : TransactionStatus.failed;
       final transaction = TransactionModel(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -91,15 +91,16 @@ class ApiService {
         amount: amount,
         dateTime: DateTime.now(),
         status: status,
-        note: note
+        type: TransactionType.upiIntent,
       );
 
       return PaymentModel(
         isSuccess: status == TransactionStatus.success,
+        rail: PaymentRail.upiIntent,
         message: status == TransactionStatus.success
             ? 'Payment completed successfully'
-            : status == TransactionStatus.pending
-                ? 'Payment is pending confirmation'
+            : status == TransactionStatus.submitted
+                ? 'Payment has been submitted for confirmation'
                 : 'Payment failed. Please try again.',
         transaction: transaction,
       );
