@@ -3,7 +3,7 @@ enum TransactionStatus { success, failed, submitted, cancelled }
 
 enum TransactionType { upiIntent, razorpay }
 
-// This model represents one persisted payment receipt in SwiftPay.
+// This model represents one persisted payment receipt in dartpay.
 class TransactionModel {
   final String id;
   final String receiverName;
@@ -30,8 +30,8 @@ class TransactionModel {
   factory TransactionModel.fromJson(Map<String, dynamic> json) {
     return TransactionModel(
       id: json['id'].toString(),
-      receiverName: json['receiverName'] as String? ?? 'SwiftPay User',
-      upiId: json['upiId'] as String? ?? 'user@swiftpay',
+      receiverName: json['receiverName'] as String? ?? 'dartpay User',
+      upiId: json['upiId'] as String? ?? 'user@dartpay',
       amount: (json['amount'] as num? ?? 0).toDouble(),
       dateTime: DateTime.tryParse(json['dateTime'] as String? ?? '') ??
           DateTime.now(),

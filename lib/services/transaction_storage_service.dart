@@ -6,7 +6,7 @@ import '../models/transaction.dart';
 
 // Persists transaction receipts locally so history survives app restarts.
 class TransactionStorageService {
-  static const _transactionsKey = 'swiftpay_transactions';
+  static const _transactionsKey = 'dartpay_transactions';
 
   final SharedPreferences _preferences;
 

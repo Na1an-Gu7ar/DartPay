@@ -107,7 +107,7 @@ class TransactionDetailScreen extends StatelessWidget {
   }
 
   String _receiptText(TransactionModel item) {
-    return 'SwiftPay receipt\n'
+    return 'dartpay receipt\n'
         'Amount: ${item.formattedAmount}\n'
         'Receiver: ${item.receiverName}\n'
         'UPI ID: ${item.upiId}\n'

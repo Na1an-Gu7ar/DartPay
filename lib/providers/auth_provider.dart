@@ -43,9 +43,9 @@ class AuthProvider extends ChangeNotifier {
 
       _user = UserModel(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
-        name: 'SwiftPay Learner',
+        name: 'dartpay Learner',
         phone: phone,
-        upiId: '$phone@swiftpay',
+        upiId: '$phone@dartpay',
         token: 'demo-token-${DateTime.now().millisecondsSinceEpoch}',
       );
       await _authService.saveUser(_user!);

@@ -30,7 +30,7 @@ class UpiPaymentService {
     required double amount,
     required String note,
   }) async {
-    final transactionRef = 'SWIFTPAY${DateTime.now().millisecondsSinceEpoch}';
+    final transactionRef = 'dartpay${DateTime.now().millisecondsSinceEpoch}';
 
     try {
       // This launches the selected UPI app. The user completes/cancels payment there.

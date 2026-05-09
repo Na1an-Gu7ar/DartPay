@@ -1,6 +1,6 @@
-# SwiftPay
+# dartpay
 
-SwiftPay is a real-payment capable Flutter UPI fintech learning app. It keeps the same beginner/intermediate-friendly structure, but now demonstrates real payment concepts: UPI Intent, Razorpay Checkout, QR scanning, SDK callbacks, transaction persistence, connectivity checks, and receipt UI.
+dartpay is a real-payment capable Flutter UPI fintech learning app. It keeps the same beginner/intermediate-friendly structure, but now demonstrates real payment concepts: UPI Intent, Razorpay Checkout, QR scanning, SDK callbacks, transaction persistence, connectivity checks, and receipt UI.
 
 > Important: this project is for learning. Use Razorpay **test mode** while learning. Production apps must create orders and verify payment signatures on a backend before delivering goods/services.
 
@@ -75,7 +75,7 @@ lib/
 
 ### 1. App startup
 
-Open `lib/main.dart`. SwiftPay loads `SharedPreferences`, creates payment/API services, and registers providers with `MultiProvider`.
+Open `lib/main.dart`. dartpay loads `SharedPreferences`, creates payment/API services, and registers providers with `MultiProvider`.
 
 ### 2. UPI Intent payment flow
 
@@ -85,10 +85,10 @@ Flow:
 
 1. Detect installed UPI apps using `upi_pay`.
 2. User selects an app such as Google Pay, PhonePe, Paytm, or BHIM.
-3. SwiftPay launches the selected UPI app with receiver UPI ID, name, amount, and note.
+3. dartpay launches the selected UPI app with receiver UPI ID, name, amount, and note.
 4. The UPI app asks the user to confirm and enter UPI PIN.
 5. The plugin returns a response.
-6. SwiftPay parses the response and saves a receipt locally.
+6. dartpay parses the response and saves a receipt locally.
 
 UPI Intent is useful because your Flutter app does **not** collect UPI PIN. The installed UPI app handles secure authorization.
 
@@ -98,14 +98,14 @@ Open `lib/services/razorpay_service.dart`.
 
 Flow:
 
-1. SwiftPay opens Razorpay Checkout with test key and amount.
+1. dartpay opens Razorpay Checkout with test key and amount.
 2. Razorpay shows UPI/cards/wallets/netbanking options.
 3. Razorpay triggers one callback:
    - payment success
    - payment failure
    - external wallet
-4. SwiftPay converts the callback into a `PaymentModel`.
-5. SwiftPay saves the transaction and shows the status screen.
+4. dartpay converts the callback into a `PaymentModel`.
+5. dartpay saves the transaction and shows the status screen.
 
 Production note: create Razorpay orders on your backend and verify `paymentId`, `orderId`, and `signature` server-side.
 
@@ -117,7 +117,7 @@ Flow:
 
 1. `mobile_scanner` opens the camera.
 2. User scans a UPI QR code.
-3. SwiftPay reads payloads like `upi://pay?pa=name@bank&pn=Receiver&am=100&tn=Note`.
+3. dartpay reads payloads like `upi://pay?pa=name@bank&pn=Receiver&am=100&tn=Note`.
 4. The parser extracts UPI ID, receiver name, amount, and note.
 5. GoRouter passes that data to the send-money screen for auto-fill.
 
@@ -131,7 +131,7 @@ Every payment result is stored locally using `SharedPreferences`, so the history
 
 Open `lib/providers/connectivity_provider.dart` and `lib/widgets/offline_banner.dart`.
 
-SwiftPay shows an offline banner and prevents opening Razorpay while offline. UPI Intent can still open installed apps, but the final payment depends on that UPI app and bank/network availability.
+dartpay shows an offline banner and prevents opening Razorpay while offline. UPI Intent can still open installed apps, but the final payment depends on that UPI app and bank/network availability.
 
 ## Android setup
 
@@ -141,7 +141,7 @@ SwiftPay shows an offline banner and prevents opening Razorpay while offline. UP
 - `ACCESS_NETWORK_STATE`
 - `CAMERA`
 - UPI intent package visibility through `<queries>`
-- A sample `swiftpay://payment` deep link placeholder
+- A sample `dartpay://payment` deep link placeholder
 
 ## iOS setup
 

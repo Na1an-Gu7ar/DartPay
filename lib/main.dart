@@ -47,13 +47,13 @@ Future<void> main() async {
           create: (_) => ConnectivityProvider(ConnectivityService()),
         ),
       ],
-      child: const SwiftPayApp(),
+      child: const dartpayApp(),
     ),
   );
 }
 
-class SwiftPayApp extends StatelessWidget {
-  const SwiftPayApp({super.key});
+class dartpayApp extends StatelessWidget {
+  const dartpayApp({super.key});
 
   @override
   Widget build(BuildContext context) {

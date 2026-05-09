@@ -31,7 +31,7 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
   final _upiController = TextEditingController();
   final _nameController = TextEditingController();
   final _amountController = TextEditingController();
-  final _noteController = TextEditingController(text: 'SwiftPay transfer');
+  final _noteController = TextEditingController(text: 'dartpay transfer');
   UpiAppModel? _selectedUpiApp;
   PaymentRail _selectedRail = PaymentRail.upiIntent;
 
@@ -102,7 +102,7 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
         amount: amount,
         note: _noteController.text.trim(),
         userPhone: user?.phone ?? '9999999999',
-        userName: user?.name ?? 'SwiftPay User',
+        userName: user?.name ?? 'dartpay User',
       );
     }
 
