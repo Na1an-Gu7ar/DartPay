@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../models/payment_model.dart';
+import '../models/payment_request.dart';
+import '../models/transaction.dart';
 import '../providers/auth_provider.dart';
 import '../screens/dashboard_screen.dart';
 import '../screens/login_screen.dart';
@@ -10,6 +12,7 @@ import '../screens/register_screen.dart';
 import '../screens/send_money_screen.dart';
 import '../screens/splash_screen.dart';
 import '../screens/success_screen.dart';
+import '../screens/transaction_detail_screen.dart';
 
 // AppRoutes centralizes navigation names so strings are not scattered everywhere.
 class AppRoutes {
@@ -20,6 +23,7 @@ class AppRoutes {
   static const sendMoney = '/send-money';
   static const success = '/payment-success';
   static const qrScanner = '/qr-scanner';
+  static const transactionDetail = '/transaction-detail';
 }
 
 // GoRouter gives us named routes and protected-route redirects.
@@ -34,12 +38,10 @@ class AppRouter {
 
         if (authProvider.isCheckingAuth) return AppRoutes.splash;
 
-        // If the user is not logged in, keep them on auth screens.
         if (!authProvider.isLoggedIn) {
           return isLoggingIn ? null : AppRoutes.login;
         }
 
-        // If the user is logged in, keep them away from auth screens.
         if (isLoggingIn || state.matchedLocation == AppRoutes.splash) {
           return AppRoutes.dashboard;
         }
@@ -70,7 +72,9 @@ class AppRouter {
         GoRoute(
           path: AppRoutes.sendMoney,
           name: 'sendMoney',
-          builder: (context, state) => const SendMoneyScreen(),
+          builder: (context, state) {
+            return SendMoneyScreen(initialRequest: state.extra as PaymentRequest?);
+          },
         ),
         GoRoute(
           path: AppRoutes.qrScanner,
@@ -83,6 +87,14 @@ class AppRouter {
           builder: (context, state) {
             final payment = state.extra as PaymentModel?;
             return SuccessScreen(payment: payment);
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.transactionDetail,
+          name: 'transactionDetail',
+          builder: (context, state) {
+            final transaction = state.extra as TransactionModel?;
+            return TransactionDetailScreen(transaction: transaction);
           },
         ),
       ],

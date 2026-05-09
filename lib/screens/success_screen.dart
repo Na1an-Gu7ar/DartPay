@@ -17,11 +17,11 @@ class SuccessScreen extends StatelessWidget {
     final transaction = payment?.transaction;
     final status = transaction?.status ?? TransactionStatus.failed;
     final isSuccess = status == TransactionStatus.success;
-    final isPending = status == TransactionStatus.pending;
+    final isSubmitted = status == TransactionStatus.submitted;
     final colorScheme = Theme.of(context).colorScheme;
     final statusColor = isSuccess
         ? Colors.green
-        : isPending
+        : isSubmitted
             ? Colors.orange
             : colorScheme.error;
 
@@ -32,24 +32,36 @@ class SuccessScreen extends StatelessWidget {
         child: Column(
           children: [
             const Spacer(),
-            CircleAvatar(
-              radius: 54,
-              backgroundColor: statusColor.withOpacity(0.12),
-              child: Icon(
-                isSuccess
-                    ? Icons.check_rounded
-                    : isPending
-                        ? Icons.schedule_rounded
-                        : Icons.close_rounded,
-                color: statusColor,
-                size: 64,
+            TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.7, end: 1),
+              duration: const Duration(milliseconds: 450),
+              curve: Curves.easeOutBack,
+              builder: (context, scale, child) => Transform.scale(
+                scale: scale,
+                child: child,
+              ),
+              child: CircleAvatar(
+                radius: 54,
+                backgroundColor: statusColor.withOpacity(0.12),
+                child: Icon(
+                  isSuccess
+                      ? Icons.check_rounded
+                      : isSubmitted
+                          ? Icons.schedule_rounded
+                          : Icons.close_rounded,
+                  color: statusColor,
+                  size: 64,
+                ),
               ),
             ),
             const SizedBox(height: 24),
             Text(
               payment?.message ?? 'Payment details are unavailable',
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
             if (transaction != null)
@@ -69,15 +81,22 @@ class SuccessScreen extends StatelessWidget {
                       _DetailRow(label: 'Status', value: transaction.statusLabel),
                       const Divider(height: 28),
                       _DetailRow(label: 'Receiver', value: transaction.receiverName),
-                      const Divider(height: 28),
-                      _DetailRow(label: 'Note', value: transaction.note),
-                      // const Divider(height: 28),
-                      // _DetailRow(label: 'Receiver', value: transaction.),
                     ],
                   ),
                 ),
               ),
             const Spacer(),
+            if (transaction != null) ...[
+              OutlinedButton.icon(
+                onPressed: () => context.push(
+                  AppRoutes.transactionDetail,
+                  extra: transaction,
+                ),
+                icon: const Icon(Icons.receipt_long_rounded),
+                label: const Text('View receipt'),
+              ),
+              const SizedBox(height: 10),
+            ],
             CustomButton(
               label: 'Back to dashboard',
               icon: Icons.home_rounded,
