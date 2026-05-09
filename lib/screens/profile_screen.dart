@@ -38,11 +38,11 @@ class ProfileScreen extends StatelessWidget {
                   const AppLogo(size: 76),
                   const SizedBox(height: 16),
                   Text(
-                    user?.name ?? 'SwiftPay User',
+                    user?.name ?? 'DartPay User',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 6),
-                  Text(user?.upiId ?? 'user@swiftpay'),
+                  Text(user?.upiId ?? 'user@dartpay'),
                 ],
               ),
             ),

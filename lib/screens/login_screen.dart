@@ -106,7 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Center(
                   child: TextButton(
                     onPressed: () => context.go(AppRoutes.register),
-                    child: const Text('New to SwiftPay? Create account'),
+                    child: const Text('New to DartPay? Create account'),
                   ),
                 ),
               ],

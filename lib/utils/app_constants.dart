@@ -1,6 +1,6 @@
 // App-wide constants keep important values in one easy-to-edit place.
 class AppConstants {
-  static const appName = 'SwiftPay';
+  static const appName = 'DartPay';
   static const appVersion = '2.0.0';
   static const demoBalance = 24580.50;
 
