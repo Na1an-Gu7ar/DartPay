@@ -38,7 +38,7 @@ class HomeScreen extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           children: [
             Text(
-              'Hello, ${user?.name ?? 'Learner'} 👋',
+              'Hello, ${user?.name ?? 'Learner'}',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
